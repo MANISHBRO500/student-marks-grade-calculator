@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Marks and Grade Calculator</title>
+  <style>
+    :root {
+      --bg: #d9d9d9;
+      --shell-bg: #f5f5f5;
+      --shell-window: #eaeaea;
+      --panel: #ffffff;
+      --console-bg: #1e1e1e;
+      --console-text: #f5f5f5;
+      --console-muted: #9aa0a6;
+      --console-green: #7fe38a;
+      --console-blue: #7ab8ff;
+      --console-red: #ff8a8a;
+      --border: #bfbfbf;
+      --header: #d4d4d4;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #d8d8d8 0%, #cfcfcf 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #1f1f1f;
+    }
+
+    .shell {
+      width: min(980px, 100%);
+      background: var(--shell-window);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border-top: 5px solid #d9d9d9;
+    }
+
+    .titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--header);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      font-size: 14px;
+      color: #2e2e2e;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .dot.red { background: #ff5f57; }
+    .dot.yellow { background: #febc2e; }
+    .dot.green { background: #28c840; }
+
+    .title-text {
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 1.35fr;
+      gap: 18px;
+      padding: 18px;
+      background: var(--shell-bg);
+    }
+
+    .panel {
+      background: #f7f7f7;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .panel h2 {
+      margin: 0 0 16px;
+      font-size: 15px;
+      color: #2e2e2e;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 12px;
+      color: #4d4d4d;
+      font-weight: 700;
+    }
+
+    input, button {
+      width: 100%;
+      border: 1px solid #cfcfcf;
+      border-radius: 8px;
+      background: #fff;
+      color: #1d1d1d;
+      padding: 11px 12px;
+      font-size: 14px;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    input:focus {
+      border-color: #7aa8ff;
+      box-shadow: 0 0 0 3px rgba(122,168,255,0.18);
+    }
+
+    button {
+      background: linear-gradient(180deg, #f9f9f9, #e9e9e9);
+      cursor: pointer;
+      font-weight: 700;
+      border-color: #bdbdbd;
+    }
+
+    button:hover {
+      background: linear-gradient(180deg, #f4f4f4, #e2e2e2);
+    }
+
+    .console {
+      background: var(--console-bg);
+      border-radius: 10px;
+      border: 1px solid #2f2f2f;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    .console-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #232323;
+      border-bottom: 1px solid #2b2b2b;
+      padding: 10px 12px;
+      color: var(--console-muted);
+      font-size: 12px;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    .console-title {
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .console-body {
+      min-height: 360px;
+      padding: 18px 16px 14px;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--console-text);
+      background: linear-gradient(180deg, #1f1f1f, #1a1a1a);
+    }
+
+    .prompt { color: var(--console-green); margin-right: 8px; font-weight: bold; }
+    .line { white-space: pre-wrap; word-break: break-word; }
+    .line.success { color: var(--console-green); }
+    .line.error { color: var(--console-red); }
+    .line.info { color: var(--console-blue); }
+
+    @media (max-width: 760px) {
+      .content { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="titlebar">
+      <div class="window-controls">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <div class="title-text">Student Marks Calculator</div>
+      <div style="width: 72px;"></div>
+    </div>
+
+    <div class="content">
+      <div class="panel">
+        <h2>Student Data</h2>
+
+        <div class="field">
+          <label for="studentName">Student Name</label>
+          <input id="studentName" type="text" value="Alice" />
+        </div>
+
+        <div class="field">
+          <label for="math">Math</label>
+          <input id="math" type="number" min="0" max="100" value="85" />
+        </div>
+
+        <div class="field">
+          <label for="science">Science</label>
+          <input id="science" type="number" min="0" max="100" value="90" />
+        </div>
+
+        <div class="field">
+          <label for="english">English</label>
+          <input id="english" type="number" min="0" max="100" value="78" />
+        </div>
+
+        <div class="field">
+          <label for="history">History</label>
+          <input id="history" type="number" min="0" max="100" value="82" />
+        </div>
+
+        <div class="field">
+          <label for="computer">Computer</label>
+          <input id="computer" type="number" min="0" max="100" value="95" />
+        </div>
+
+        <button onclick="calculateGrades()">Calculate Grade</button>
+      </div>
+
+      <div class="console" aria-live="polite">
+        <div class="console-header">
+          <span class="console-title">IDLE Console</span>
+          <span>Python 3.x</span>
+        </div>
+        <div class="console-body" id="consoleBody">
+          <div class="line info"><span class="prompt">&gt;&gt;&gt;</span> Student Name: Alice</div>
+          <div class="line info"><span class="prompt">&gt;&gt;&gt;</span> Math: 85</div>
+          <div class="line info"><span class="prompt">&gt;&gt;&gt;</span> Science: 90</div>
+          <div class="line info"><span class="prompt">&gt;&gt;&gt;</span> English: 78</div>
+          <div class="line info"><span class="prompt">&gt;&gt;&gt;</span> History: 82</div>
+          <div class="line info"><span class="prompt">&gt;&gt;&gt;</span> Computer: 95</div>
+          <div class="line success"><span class="prompt">&gt;&gt;&gt;</span> Total Marks: 430/500</div>
+          <div class="line success"><span class="prompt">&gt;&gt;&gt;</span> Average: 86.00</div>
+          <div class="line success"><span class="prompt">&gt;&gt;&gt;</span> Grade: A</div>
+          <div class="line success"><span class="prompt">&gt;&gt;&gt;</span> Result: PASS</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function calculateGrades() {
+      const studentName = document.getElementById('studentName').value || 'Student';
+      const subjects = [
+        { name: 'Math', value: Number(document.getElementById('math').value) },
+        { name: 'Science', value: Number(document.getElementById('science').value) },
+        { name: 'English', value: Number(document.getElementById('english').value) },
+        { name: 'History', value: Number(document.getElementById('history').value) },
+        { name: 'Computer', value: Number(document.getElementById('computer').value) }
+      ];
+
+      const consoleBody = document.getElementById('consoleBody');
+      const invalid = subjects.some(s => !Number.isFinite(s.value) || s.value < 0 || s.value > 100);
+
+      if (invalid) {
+        consoleBody.innerHTML = `<div class="line error"><span class="prompt">&gt;&gt;&gt;</span> Error! Marks must be between 0 and 100.</div>`;
+        return;
+      }
+
+      const total = subjects.reduce((sum, s) => sum + s.value, 0);
+      const average = total / subjects.length;
+      let grade = 'F';
+
+      if (average >= 90) grade = 'A+';
+      else if (average >= 80) grade = 'A';
+      else if (average >= 70) grade = 'B';
+      else if (average >= 60) grade = 'C';
+      else if (average >= 50) grade = 'D';
+      else if (average >= 40) grade = 'E';
+
+      const result = subjects.every(s => s.value >= 40) ? 'PASS' : 'FAIL';
+
+      const lines = [
+        { text: `Student Name: ${studentName}`, type: 'info' },
+        ...subjects.map(s => ({ text: `${s.name}: ${s.value}`, type: 'info' })),
+        { text: `Total Marks: ${total}/${subjects.length * 100}`, type: 'success' },
+        { text: `Average: ${average.toFixed(2)}`, type: 'success' },
+        { text: `Grade: ${grade}`, type: 'success' },
+        { text: `Result: ${result}`, type: result === 'PASS' ? 'success' : 'error' }
+      ];
+
+      consoleBody.innerHTML = lines.map(line => {
+        return `<div class="line ${line.type}"><span class="prompt">&gt;&gt;&gt;</span> ${line.text}</div>`;
+      }).join('');
+    }
+  </script>
+</body>
+</html>
